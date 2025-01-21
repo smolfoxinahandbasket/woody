@@ -1,0 +1,56 @@
+# https://taskfile.dev
+
+version: '3'
+interval: '200ms'
+
+tasks:
+  build:
+    cmds:
+      - task: build-binary-for-goos-and-goarch
+        vars:
+          BINARY_NAME: 'woody'
+          GOOS:
+            sh: go env GOOS
+          GOARCH:
+            sh: go env GOARCH
+
+  build-all-binaries:
+    cmds:
+      - for: [ 'darwin', 'windows', 'linux' ]
+        task: build-binary-for-goos
+        vars:
+          BINARY_NAME: 'woody'
+          GOOS: "{{.ITEM}}"
+
+  build-binary-for-goos:
+    cmds:
+      - for: [ 'arm64', 'amd64' ]
+        task: build-binary-for-goos-and-goarch
+        vars:
+          BINARY_NAME: "{{.BINARY_NAME}}"
+          GOOS: "{{.GOOS}}"
+          GOARCH: "{{.ITEM}}"
+
+  build-binary-for-goos-and-goarch:
+    sources:
+      - "{{.ROOT_DIR}}/*.go"
+    generates:
+      - "{{.BINARY_NAME}}-{{.GOOS}}-{{.GOARCH}}"
+    env:
+      GOOS: "{{.GOOS}}"
+      GOARCH: "{{.GOARCH}}"
+    cmds:
+      - go build -o "{{.ROOT_DIR}}/{{.BINARY_NAME}}-{{.GOOS}}-{{.GOARCH}}" ./
+
+  run:
+    deps: [build]
+    vars:
+      GOOS:
+        sh: go env GOOS
+      GOARCH:
+        sh: go env GOARCH
+    env:
+      WOODY_LOG_LEVEL: debug
+      TZ: UTC
+    cmds:
+      - cmd: "./woody-{{.GOOS}}-{{.GOARCH}}"

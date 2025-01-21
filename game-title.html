@@ -1,0 +1,14 @@
+<html>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script>
+        $(document).ready(function(){
+            $.getJSON("http://localhost:16669/?woodyrequestType=Title", function(response) {
+                console.log(response)
+                $("#woodyResult").replaceWith(response.title)
+            });  
+        });
+    </script>
+    <body>
+        <div id="woodyResult">blarg</div>
+    </body>
+</html>
